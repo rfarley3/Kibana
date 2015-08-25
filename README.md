@@ -1,13 +1,23 @@
-## Kibana
+```
+      :::    :::::::::::::::::::::::     :::    ::::    :::    :::
+     :+:   :+:     :+:    :+:    :+:  :+: :+:  :+:+:   :+:  :+: :+:
+    +:+  +:+      +:+    +:+    +:+ +:+   +:+ :+:+:+  +:+ +:+   +:+
+   +#++:++       +#+    +#++:++#+ +#++:++#++:+#+ +:+ +#++#++:++#++:
+  +#+  +#+      +#+    +#+    +#++#+     +#++#+  +#+#+#+#+     +#+
+ #+#   #+#     #+#    #+#    #+##+#     #+##+#   #+#+##+#     #+#
+###    ####################### ###     ######    #######     ###
+```
 
-### Python based CLI for interacting with Kibana v4 configuration (.kibana index)
+### Kibana: a CLI for Kibana v4 configuration (.kibana index interaction)
+
+
 
 ```
 $ python -m kibana --help
-usage: __main__.py [-h] [--status STATUS_IDX] [--refresh REFRESH_IDX]
-                   [--poll POLL_IDX] [--export EXPORT_OBJ]
-                   [--import IMPORT_FILE] [--pkg] [--outdir OUTPUT_PATH]
-                   [--host HOST]
+usage: [-h] [--status STATUS_IDX] [--refresh REFRESH_IDX]
+       [--poll POLL_IDX] [--export EXPORT_OBJ]
+       [--import IMPORT_FILE] [--pkg] [--outdir OUTPUT_PATH]
+       [--host HOST]
 
 .kibana interaction module
 
@@ -30,7 +40,7 @@ optional arguments:
 ```
 
 
-## Mapping Cache (`refreshFields()`) Examples
+## Mapping Cache Examples/`refreshFields()` Emulation
 
 * Refresh fields' mapping cache for index pattern 'aaa*'
     * `python -m kibana --refresh 'aaa*'`
