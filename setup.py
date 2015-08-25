@@ -9,7 +9,6 @@ setup(
     packages=['kibana'],
     install_requires=(
         'elasticsearch',
-        'requests>=2.5.0',
         'argparse',
         'requests',
     )
