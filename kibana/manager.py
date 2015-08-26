@@ -80,7 +80,7 @@ class KibanaManager():
         # TODO consider putting into a ES class
         print('put_obj: %s' % self.json_dumps(obj))
         """
-        Wrapper for es.index, determines metadata needed to index from obj itself.
+        Wrapper for es.index, determines metadata needed to index from obj.
         If you have a raw object json string you can hard code these:
         index is .kibana (as of kibana4);
         id can be A-Za-z0-9\- and must be unique;
@@ -133,7 +133,8 @@ class KibanaManager():
 
     def write_object_to_file(self, obj, path='.'):
         """
-        The objs are dicts, so convert(ordered) to json string and write to file
+        The objs are dicts, so convert(ordered) to json string and
+        write to file
         """
         output = self.json_dumps(obj) + '\n'
         filename = "%s-%s.json" % (obj['_type'], obj['_id'])
@@ -165,7 +166,6 @@ class KibanaManager():
     def get_objects(self, search_field, search_val):
         """
         Return all the objects of type (assuming we have less than MAX_HITS)
-        from index (probably .kibana)
         """
         query = ("{ size: " + str(self.max_hits) + ", " +
                  "query: { filtered: { filter: { " +

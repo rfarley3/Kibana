@@ -20,27 +20,28 @@ class KibanaMapping():
         # determined by the value within ES's 'index', which could be:
         #     { analyzed, no, not_analyzed }
         self.mappings = ['type', 'doc_values']
-        # there are a number of system fields:
+        # ignore system fields:
         self.sys_mappings = ['_source', '_index', '_type', '_id']
+        # .kibana has some fields to ignore too:
         self.mappings_ignore = ['count']
 
     def update_urls(self):
-        # 'http://localhost:5601/elasticsearch/cat*/_mapping/field/*?ignore_unavailable=false&allow_no_indices=false&include_defaults=true'
-        # 'http://localhost:9200/cat*/_mapping/field/*?ignore_unavailable=false&allow_no_indices=false&include_defaults=true'
+        # 'http://localhost:5601/elasticsearch/aaa*/_mapping/field/*?ignore_unavailable=false&allow_no_indices=false&include_defaults=true'
+        # 'http://localhost:9200/aaa*/_mapping/field/*?ignore_unavailable=false&allow_no_indices=false&include_defaults=true'
         self.es_get_url = ('http://%s:%s/' % (self._host[0], self._host[1]) +
                            '%s/' % self._index_pattern +
                            '_mapping/field/' +
                            '*?ignore_unavailable=false&' +
                            'allow_no_indices=false&' +
                            'include_defaults=true')
-        # 'http://localhost:5601/elasticsearch/.kibana/index-pattern/cat*'
-        # 'http://localhost:9200/.kibana/index-pattern/cat*'
+        # 'http://localhost:5601/elasticsearch/.kibana/index-pattern/aaa*'
+        # 'http://localhost:9200/.kibana/index-pattern/aaa*'
         self.post_url = ('http://%s:%s/' % (self._host[0], self._host[1]) +
                          '%s/' % self.index +
                          'index-pattern/%s' % self._index_pattern)
-        # 'http://localhost:5601/elasticsearch/.kibana/index-pattern/cat*'
-        # 'http://localhost:9200/.kibana/index-pattern/_search/?id=cat*'
-        # 'http://localhost:9200/.kibana/index-pattern/cat*/'
+        # 'http://localhost:5601/elasticsearch/.kibana/index-pattern/aaa*'
+        # 'http://localhost:9200/.kibana/index-pattern/_search/?id=aaa*'
+        # 'http://localhost:9200/.kibana/index-pattern/aaa*/'
         self.get_url = ('http://%s:%s/' % (self._host[0], self._host[1]) +
                         '%s/' % self.index +
                         'index-pattern/%s/' % self._index_pattern)
@@ -72,7 +73,7 @@ class KibanaMapping():
                 # print("get_field_cache(kibana), HTTPError: %s" % e)
                 return []
             index_pattern = json.loads(search_results)
-            # Results look like: {"_index":".kibana","_type":"index-pattern","_id":"cat*","_version":6,"found":true,"_source":{"title":"cat*","fields":"<what we want>"}}
+            # Results look like: {"_index":".kibana","_type":"index-pattern","_id":"aaa*","_version":6,"found":true,"_source":{"title":"aaa*","fields":"<what we want>"}}
             fields_str = index_pattern['_source']['fields']
             return json.loads(fields_str)
         elif cache_type == 'es' or cache_type.startswith('elastic'):
@@ -112,7 +113,7 @@ class KibanaMapping():
         index_pattern = self.field_cache_to_index_pattern(field_cache)
         # print("request/post: %s" % index_pattern)
         resp = requests.post(self.post_url, data=index_pattern).text
-        # resp = {"_index":".kibana","_type":"index-pattern","_id":"cat*","_version":1,"created":true}
+        # resp = {"_index":".kibana","_type":"index-pattern","_id":"aaa*","_version":1,"created":true}
         resp = json.loads(resp)
         return 0
         # TODO detect failure (return 1)
@@ -242,7 +243,7 @@ class KibanaMapping():
         es_cache = self.get_field_cache('es')
         if force:
             print("Forcing mapping update")
-            # no ned to get kibana if we are forcing it
+            # no need to get kibana if we are forcing it
             return self.post_field_cache(es_cache)
         k_cache = self.get_field_cache('kibana')
         if self.is_kibana_cache_incomplete(es_cache, k_cache):
@@ -269,9 +270,9 @@ class KibanaMapping():
                 es_dict[field['name']][ign_f] = 0
         es_set = set(es_dict.keys())
         k_set = set(k_dict.keys())
-        # reason that kibana cache is incomplete:
+        # reasons why kibana cache could be incomplete:
         #     k_dict is missing keys that are within es_dict
-        #     We don't really care if k has keys that es doesn't
+        #     We don't care if k has keys that es doesn't
         # es {1,2} k {1,2,3}; intersection {1,2}; len(es-{}) 0
         # es {1,2} k {1,2};   intersection {1,2}; len(es-{}) 0
         # es {1,2} k {};      intersection {};    len(es-{}) 2
@@ -300,7 +301,7 @@ class KibanaMapping():
             self.compare_field_caches(
                 self.get_field_cache(cache_type='es'),
                 self.get_field_cache(cache_type='kibana'))
-            vagrant ssh -c "cd /vagrant && /opt/virtualenvs/provisioning/ENV/bin/python -c \"import tools.kibana; dotk = tools.kibana.DotKibana('cat*'); dotk.mapping.compare_field_caches(dotk.mapping.get_field_cache(cache_type='es'), dotk.mapping.get_field_cache(cache_type='kibana'))\""
+            vagrant ssh -c "cd /vagrant && python -c \"import tools.kibana; dotk = tools.kibana.DotKibana('aaa*'); dotk.mapping.compare_field_caches(dotk.mapping.get_field_cache(cache_type='es'), dotk.mapping.get_field_cache(cache_type='kibana'))\""
         """
         if original is None:
             original = []

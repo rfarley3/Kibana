@@ -28,15 +28,17 @@ optional arguments:
   --refresh REFRESH_IDX, -r REFRESH_IDX
                         refreshes mapping
   --poll POLL_IDX, -p POLL_IDX
-                        periodically polls mapping and refreshes if necessary
+                        periodically polls (15s) mapping and refreshes if necessary
   --export EXPORT_OBJ, -e EXPORT_OBJ
                         [all|config|dashboard name] to json individual/pkg
+                        default: all
   --import IMPORT_FILE, -i IMPORT_FILE
                         import .kibana json obj/pkg
   --pkg                 use pkg mode for import/export
   --outdir OUTPUT_PATH, -o OUTPUT_PATH
                         export only: output file(s) directory
   --host HOST           ES host to use, format ip:port
+                        default: 127.0.0.1:9200
 ```
 
 
