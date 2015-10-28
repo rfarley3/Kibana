@@ -65,7 +65,7 @@ class KibanaMapping():
         self.update_urls()
 
     def get_field_cache(self, cache_type='es'):
-        """ Return a list of fields' mappings """
+        """Return a list of fields' mappings"""
         if cache_type == 'kibana':
             try:
                 search_results = urlopen(self.get_url).read()
@@ -109,7 +109,7 @@ class KibanaMapping():
         return deduped
 
     def post_field_cache(self, field_cache):
-        """ Where field_cache is a list of fields' mappings """
+        """Where field_cache is a list of fields' mappings"""
         index_pattern = self.field_cache_to_index_pattern(field_cache)
         # print("request/post: %s" % index_pattern)
         resp = requests.post(self.post_url, data=index_pattern).text
@@ -119,7 +119,7 @@ class KibanaMapping():
         # TODO detect failure (return 1)
 
     def field_cache_to_index_pattern(self, field_cache):
-        """ Return a .kibana index-pattern doc_type """
+        """Return a .kibana index-pattern doc_type"""
         mapping_dict = {}
         mapping_dict['customFormats'] = "{}"
         mapping_dict['title'] = self.index_pattern
@@ -130,8 +130,10 @@ class KibanaMapping():
         return mapping_str
 
     def check_mapping(self, m):
-        """ Make sure the minimum set of fields are in the mapping cache
-            Does not verify if contents are valid
+        """Make sure the minimum set of fields are in the mapping cache
+
+        Does not verify if contents are valid
+
         """
         if 'name' not in m:
             print("Missing %s" % "name")
@@ -150,7 +152,7 @@ class KibanaMapping():
         return True
 
     def get_index_mappings(self, index):
-        """ Converts all index's doc_types to .kibana """
+        """Converts all index's doc_types to .kibana"""
         fields_arr = []
         for (key, val) in index.iteritems():
             # print("\tdoc_type: %s" % key)
@@ -162,7 +164,7 @@ class KibanaMapping():
         return fields_arr
 
     def get_doc_type_mappings(self, doc_type):
-        """ Converts all doc_types' fields to .kibana """
+        """Converts all doc_types' fields to .kibana"""
         doc_fields_arr = []
         for (key, val) in doc_type.iteritems():
             # _ are system
@@ -200,7 +202,7 @@ class KibanaMapping():
         return doc_fields_arr
 
     def get_field_mappings(self, field):
-        """ Converts ES field mappings to .kibana field mappings """
+        """Converts ES field mappings to .kibana field mappings"""
         retdict = {}
         retdict['indexed'] = False
         retdict['analyzed'] = False
@@ -253,8 +255,10 @@ class KibanaMapping():
         return 0
 
     def is_kibana_cache_incomplete(self, es_cache, k_cache):
-        """ We assue that k_cache is always correct
-            But it could be missing new fields that es_cache has
+        """Test if k_cache is incomplete
+
+        Assume k_cache is always correct, but could be missing new
+        fields that es_cache has
         """
         # convert list into dict, with each item's ['name'] as key
         k_dict = {}
@@ -282,6 +286,7 @@ class KibanaMapping():
         return len(es_set - k_set.intersection(es_set)) > 0
 
     def list_to_compare_dict(self, list_form):
+        """Convert list into a data structure we can query easier"""
         compare_dict = {}
         for field in list_form:
             if field['name'] in compare_dict:
@@ -296,12 +301,14 @@ class KibanaMapping():
         return compare_dict
 
     def compare_field_caches(self, replica, original):
-        """ Use to test if our code is equiv to Kibana.refreshFields()
-            Within Kibana GUI click refreshFields
-            self.compare_field_caches(
-                self.get_field_cache(cache_type='es'),
-                self.get_field_cache(cache_type='kibana'))
-            vagrant ssh -c "cd /vagrant && python -c \"import tools.kibana; dotk = tools.kibana.DotKibana('aaa*'); dotk.mapping.compare_field_caches(dotk.mapping.get_field_cache(cache_type='es'), dotk.mapping.get_field_cache(cache_type='kibana'))\""
+        """Use to test if our code is equiv to Kibana.refreshFields()
+
+        Within Kibana GUI click refreshFields
+        self.compare_field_caches(
+            self.get_field_cache(cache_type='es'),
+            self.get_field_cache(cache_type='kibana'))
+        vagrant ssh -c "cd /vagrant && python -c \"import tools.kibana; dotk = tools.kibana.DotKibana('aaa*'); dotk.mapping.compare_field_caches(dotk.mapping.get_field_cache(cache_type='es'), dotk.mapping.get_field_cache(cache_type='kibana'))\""
+
         """
         if original is None:
             original = []

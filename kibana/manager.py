@@ -41,6 +41,7 @@ Alternative is to skip the ES API and use urllib/curl on
 
 
 class KibanaManager():
+    """Import/Export Kibana objects"""
     def __init__(self, index, host):
         self._host_ip = host[0]
         self._host_port = host[1]
@@ -113,9 +114,7 @@ class KibanaManager():
             self.put_object(obj)
 
     def del_object(self, obj):
-        """
-        Debug used to delete the obj of type with id of obj['_id']
-        """
+        """Debug deletes obj of obj[_type] with id of obj['_id']"""
         if obj['_index'] is None or obj['_index'] == "":
             raise Exception("Invalid Object")
         if obj['_id'] is None or obj['_id'] == "":
@@ -123,13 +122,16 @@ class KibanaManager():
         if obj['_type'] is None or obj['_type'] == "":
             raise Exception("Invalid Object")
         self.connect_es()
-        self.es.delete(index=obj['_index'], id=obj['_id'], doc_type=obj['_type'])
+        self.es.delete(index=obj['_index'],
+                       id=obj['_id'],
+                       doc_type=obj['_type'])
 
     def del_objects(self, objects):
         for name, obj in objects.iteritems():
             self.del_object(obj)
 
     def json_dumps(self, obj):
+        """Serializer for consistency"""
         return json.dumps(obj, sort_keys=True, indent=4, separators=(',', ': '))
 
     def safe_filename(self, otype, oid):
@@ -152,12 +154,9 @@ class KibanaManager():
         return fname
 
     def write_object_to_file(self, obj, path='.'):
-        """
-        The objs are dicts, so convert(ordered) to json string and
-        write to file
-        """
+        """Convert obj (dict) to json string and write to file"""
         output = self.json_dumps(obj) + '\n'
-        filename = "%s-%s.json" % (obj['_type'], obj['_id'])
+        filename = self.safe_filename(obj['_type'], obj['_id'])
         filename = os.path.join(path, filename)
         print("Writing to file: " + filename)
         with open(filename, 'w') as f:
@@ -170,12 +169,13 @@ class KibanaManager():
             self.write_object_to_file(obj, path)
 
     def write_pkg_to_file(self, name, objects, path='.'):
+        """Write a list of related objs to file"""
         objs = {}
         objs['docs'] = []
         for _, obj in objects.iteritems():
             objs['docs'].append(obj)
         output = self.json_dumps(objs) + '\n'
-        filename = "%s-Pkg.json" % (name)
+        filename = self.safe_filename('Pkg', name)
         filename = os.path.join(path, filename)
         print("Writing to file: " + filename)
         with open(filename, 'w') as f:
@@ -184,9 +184,7 @@ class KibanaManager():
         return filename
 
     def get_objects(self, search_field, search_val):
-        """
-        Return all the objects of type (assuming we have less than MAX_HITS)
-        """
+        """Return all objects of type (assumes < MAX_HITS)"""
         query = ("{ size: " + str(self.max_hits) + ", " +
                  "query: { filtered: { filter: { " +
                  search_field + ": { value: \"" + search_val + "\"" +
@@ -208,24 +206,23 @@ class KibanaManager():
         return objects
 
     def get_config(self):
-        """ Wrapper for get_objects to collect config
-            NOTE, skips index-pattern
-        """
+        """ Wrapper for get_objects to collect config; skips index-pattern"""
         return self.get_objects("type", "config")
 
     def get_visualizations(self):
-        """ Wrapper for get_objects to collect all visualizations """
+        """Wrapper for get_objects to collect all visualizations"""
         return self.get_objects("type", "visualization")
 
     def get_dashboards(self):
-        """ Wrapper for get_objects to collect all dashboards """
+        """Wrapper for get_objects to collect all dashboards"""
         return self.get_objects("type", "dashboard")
 
     def get_searches(self):
-        """ Wrapper for get_objects to collect all saved searches """
+        """Wrapper for get_objects to collect all saved searches"""
         return self.get_objects("type", "search")
 
     def get_dashboard_full(self, dboard):
+        """Get DB and all objs needed to duplicate it"""
         objects = {}
         dashboards = self.get_objects("type", "dashboard")
         vizs = self.get_objects("type", "visualization")
