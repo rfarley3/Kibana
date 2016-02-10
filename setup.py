@@ -11,5 +11,10 @@ setup(
         'elasticsearch',
         'argparse',
         'requests',
-    )
+    ),
+    entry_points={
+        'console_scripts': [
+            'dotkibana = kibana.__main__:main',
+        ]
+    },
 )
