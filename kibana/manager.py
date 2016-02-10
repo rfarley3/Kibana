@@ -75,7 +75,6 @@ class KibanaManager():
         obj = {}
         with open(filename, 'r') as f:
             obj = json.loads(f.read())
-        objs = obj['docs']
         return objs
 
     def put_object(self, obj):
@@ -174,7 +173,7 @@ class KibanaManager():
         objs['docs'] = []
         for _, obj in objects.iteritems():
             objs['docs'].append(obj)
-        output = self.json_dumps(objs) + '\n'
+        output = self.json_dumps(objs['docs']) + '\n'
         filename = self.safe_filename('Pkg', name)
         filename = os.path.join(path, filename)
         print("Writing to file: " + filename)
