@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from __future__ import absolute_import, division, unicode_literals, print_function
 
-from elasticsearch import Elasticsearch
+from elasticsearch import Elasticsearch, RequestError
 from datetime import datetime
 import json
 import os
@@ -97,11 +97,16 @@ class KibanaManager():
         if obj['_source'] is None or obj['_source'] == "":
             raise Exception("Invalid Object, no _source")
         self.connect_es()
-        self.es.indices.create(index=obj['_index'], ignore=400)
-        resp = self.es.index(index=obj['_index'],
-                             id=obj['_id'],
-                             doc_type=obj['_type'],
-                             body=obj['_source'])
+        self.es.indices.create(index=obj['_index'], ignore=400, timeout="2m")
+        try:
+            resp = self.es.index(index=obj['_index'],
+                                 id=obj['_id'],
+                                 doc_type=obj['_type'],
+                                 body=obj['_source'], timeout="2m")
+        except RequestError as e:
+            print e.error
+            print e.info
+            raise
         return resp
 
     def put_pkg(self, objs):
