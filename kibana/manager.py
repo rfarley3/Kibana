@@ -104,8 +104,7 @@ class KibanaManager():
                                  doc_type=obj['_type'],
                                  body=obj['_source'], timeout="2m")
         except RequestError as e:
-            print e.error
-            print e.info
+            print('RequestError: %s, info: %s' % (e.error, e.info))
             raise
         return resp
 
