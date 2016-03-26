@@ -75,7 +75,7 @@ class KibanaManager():
         obj = {}
         with open(filename, 'r') as f:
             obj = json.loads(f.read())
-        return objs
+        return obj
 
     def put_object(self, obj):
         # TODO consider putting into a ES class
