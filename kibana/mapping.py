@@ -83,11 +83,13 @@ class KibanaMapping():
             # now convert the mappings into the .kibana format
             field_cache = []
             for (index_name, val) in es_mappings.iteritems():
-                if index_name != self.index:
-                    # print("index: %s" % key)
-                    field_cache.extend(
-                        self.get_index_mappings(es_mappings[index_name]['mappings'])
-                    )
+                if index_name != self.index:  # only get non-'.kibana' indices
+                    # print("index: %s" % index_name)
+                    m_dict = es_mappings[index_name]['mappings']
+                    # print('m_dict %s' % m_dict)
+                    mappings = self.get_index_mappings(m_dict)
+                    # print('mappings %s' % mappings)
+                    field_cache.extend(mappings)
             field_cache = self.dedup_field_cache(field_cache)
             return field_cache
         print("Unknown cache type: %s" % cache_type)
@@ -157,6 +159,7 @@ class KibanaMapping():
         for (key, val) in index.iteritems():
             # print("\tdoc_type: %s" % key)
             doc_mapping = self.get_doc_type_mappings(index[key])
+            # print("\tdoc_mapping: %s" % doc_mapping)
             if doc_mapping is None:
                 return None
             # keep adding to the fields array
@@ -166,11 +169,14 @@ class KibanaMapping():
     def get_doc_type_mappings(self, doc_type):
         """Converts all doc_types' fields to .kibana"""
         doc_fields_arr = []
+        found_score = False
         for (key, val) in doc_type.iteritems():
+            # print("\t\tfield: %s" % key)
+            # print("\tval: %s" % val)
+            add_it = False
+            retdict = {}
             # _ are system
-            if key in self.sys_mappings or not key.startswith('_'):
-                # print("\t\tfield: %s" % key)
-                # print("\tval: %s" % val)
+            if not key.startswith('_'):
                 if 'mapping' not in doc_type[key]:
                     print("Error, no mapping in doc_type[%s]" % key)
                     return None
@@ -182,23 +188,33 @@ class KibanaMapping():
                     print("Error, couldn't find subkey doc_type[%s]['mapping'][%s]" % (key, subkey_name))
                     return None
                 # print("\t\tsubkey_name: %s" % subkey_name)
-                retdict = {}
                 retdict = self.get_field_mappings(doc_type[key]['mapping'][subkey_name])
+                add_it = True
+            # system mappings don't list a type,
+            # but kibana makes them all strings
+            if key in self.sys_mappings:
+                retdict['analyzed'] = False
+                retdict['indexed'] = False
+                if key == '_source':
+                    retdict = self.get_field_mappings(doc_type[key]['mapping'][key])
+                    retdict['type'] = "_source"
+                elif key == '_score':
+                    retdict['type'] = "number"
+                elif 'type' not in retdict:
+                    retdict['type'] = "string"
+                add_it = True
+            if add_it:
                 retdict['name'] = key
                 retdict['count'] = 0  # always init to 0
                 retdict['scripted'] = False  # I haven't observed a True yet
-                # system mappings don't list a type,
-                # but kibana makes them all strings
-                if key == '_source':
-                    retdict['type'] = "_source"
-                elif key.startswith('_') and 'type' not in retdict:
-                    retdict['type'] = "string"
                 if not self.check_mapping(retdict):
                     print("Error, invalid mapping")
                     return None
                 # the fields element is an escaped array of json
                 # make the array here, after all collected, then escape it
                 doc_fields_arr.append(retdict)
+        if not found_score:
+            doc_fields_arr.append({"name": "_score", "type": "number", "count": 0, "scripted": False, "indexed": False, "analyzed": False, "doc_values": False})
         return doc_fields_arr
 
     def get_field_mappings(self, field):
