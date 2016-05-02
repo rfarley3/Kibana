@@ -19,10 +19,12 @@
 
 ## Install
 
-* Create console entry point in path named `dotkibana`
+* Use with installing:
     * PyPI: `pip install kibana`
     * Distutils from within repo: `python setup.py install`
+    * Either of the above creates a console entry point in your path named `dotkibana`
 * Use without installing: `python -m kibana`
+    * For any example that follows, replace `dotkibana` with `python -m kibana`
 
 
 ## Usage
