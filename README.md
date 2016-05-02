@@ -10,10 +10,24 @@
 
 ### Kibana: a CLI for Kibana v4 configuration (.kibana index interaction)
 
+* Import/export Kibana dashboards, visualizations, saved searches
+    * Compatible with Kibana UI's import/export
+    * Can manage config and index-pattern documents
+* Refresh field mappings
+    * Run periodic refresh to keep Kibana in sync with ES data
 
 
+## Install
+
+* Create console entry point in path named `dotkibana`
+    * PyPI: `pip install kibana`
+    * Distutils from within repo: `python setup.py install`
+* Use without installing: `python -m kibana`
+
+
+## Usage
 ```
-$ python -m kibana --help
+$ dotkibana --help
 usage: [-h] [--status STATUS_IDX] [--refresh REFRESH_IDX]
        [--poll POLL_IDX] [--export EXPORT_OBJ]
        [--import IMPORT_FILE] [--pkg] [--outdir OUTPUT_PATH]
@@ -45,20 +59,28 @@ optional arguments:
 ## Mapping Cache Examples/`refreshFields()` Emulation
 
 * Refresh fields' mapping cache for index pattern 'aaa*'
-    * `python -m kibana --refresh 'aaa*'`
+    * `dotkibana --refresh 'aaa*'`
 * Check the status of a mapping cache:
-    * `python -m kibana --status 'aaa*'`
+    * `dotkibana --status 'aaa*'`
 * Periodically enforce mapping cache correctness using ES node 10.0.0.1:
-    * `python -m kibana --poll 'aaa*' --host 10.0.0.1:9200`
+    * `dotkibana --poll 'aaa*' --host 10.0.0.1:9200`
 
 
 ## Import/Export Object Examples
 
 * Get all objects into a single file `all-Pkg.json` under `tmp` under current working directory:
-    * `python -m kibana --export all --pkg --outdir tmp`
+    * `dotkibana --export all --pkg --outdir tmp`
 * Get dashboard named 'Big Picture' (and all its vis/search):
-    * `python -m kibana --export Big-Picture --pkg --outdir tmp`
+    * `dotkibana --export Big-Picture --pkg --outdir tmp`
 * Same, but each object in its own file:
-    * `python -m kibana --export Big-Picture --outdir tmp`
+    * `dotkibana --export Big-Picture --outdir tmp`
 
 
+## Testing before Deployment
+
+* Use Kibana UI to refresh field mappings
+* Verify that the following command indicates equality
+    * Replace INDEX_PATT with the index pattern to refresh
+```
+python -c "import kibana; dotk = kibana.DotKibana('INDEX_PATT'); dotk.mapping.compare_field_caches(dotk.mapping.get_field_cache(cache_type='es'), dotk.mapping.get_field_cache(cache_type='kibana'))"
+```
