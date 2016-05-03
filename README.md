@@ -84,5 +84,25 @@ optional arguments:
 * Verify that the following command indicates equality
     * Replace INDEX_PATT with the index pattern to refresh
 ```
-python -c "import kibana; dotk = kibana.DotKibana('INDEX_PATT'); dotk.mapping.compare_field_caches(dotk.mapping.get_field_cache(cache_type='es'), dotk.mapping.get_field_cache(cache_type='kibana'))"
+python -c "import kibana; kibana.DotKibana('INDEX_PATT').mapping.test_cache();"
+```
+
+## Release Checklist
+
+* mktmpenv
+    * For both python 2 and 3
+    * `pip install -e .`
+    * Do tests
+    * `deactivate`
+* Update setup.py: version and download_url to use <tag>
+    * Current form is the version number (without the letter v), e.g. 0.3
+* Push to GitHub and PyPI
+```
+git add setup.py
+git commit -m 'Bump to version <tag>'
+git push
+git tag -a <tag> -m '<Annotated tag message>'
+git push origin <tag>
+python setup.py sdist upload -r pypitest
+python setup.py sdist upload -r pypi
 ```
