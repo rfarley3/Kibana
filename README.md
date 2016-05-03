@@ -93,7 +93,7 @@ python -c "import kibana; kibana.DotKibana('INDEX_PATT').mapping.test_cache();"
     * `pip install -e .`
     * Do tests
     * `deactivate`
-* flake8 Kibana/*.py
+* flake8 kibana/*.py
 * Update setup.py: version and download_url to use <tag>
     * Current form is the version number (without the letter v), e.g. 0.3
 * Push to GitHub and PyPI
