@@ -3,12 +3,12 @@ from setuptools import setup
 setup(
     name='kibana',
     packages=['kibana'],
-    version='0.2',
-    description='Kibana configuration index (.kibana in v4) command line interface and python API (visualization import/export and mappings refresh)',
+    version='0.3',
+    description='Kibana configuration index (.kibana) command line interface and python API (visualization import/export and mappings refresh)',
     author='Ryan Farley',
     author_email='rfarley@mitre.org',
     url='https://github.com/rfarley3/Kibana',
-    download_url='https://github.com/rfarley3/Kibana/tarball/0.2',
+    download_url='https://github.com/rfarley3/Kibana/tarball/0.3',
     keywords=['kibana', 'config', 'import', 'export', 'mappings'],
     classifiers=[],
     install_requires=(
