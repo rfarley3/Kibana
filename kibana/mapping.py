@@ -2,10 +2,28 @@
 from __future__ import absolute_import, division, unicode_literals, print_function
 
 import re
-from urllib2 import urlopen, HTTPError
+try:
+    from urllib2 import urlopen, HTTPError
+except ImportError:
+    # Python 3
+    from urllib.request import urlopen
+    from urllib.error import HTTPError
 import json
 import requests
 import time
+import sys
+
+
+PY3 = False
+if sys.version_info[0] >= 3:
+    PY3 = True
+
+
+def iteritems(d):
+    if PY3:
+        return d.items()
+    else:
+        return d.iteritems()
 
 
 class KibanaMapping():
@@ -68,7 +86,7 @@ class KibanaMapping():
         """Return a list of fields' mappings"""
         if cache_type == 'kibana':
             try:
-                search_results = urlopen(self.get_url).read()
+                search_results = urlopen(self.get_url).read().decode('utf-8')
             except HTTPError:  # as e:
                 # print("get_field_cache(kibana), HTTPError: %s" % e)
                 return []
@@ -77,12 +95,12 @@ class KibanaMapping():
             fields_str = index_pattern['_source']['fields']
             return json.loads(fields_str)
         elif cache_type == 'es' or cache_type.startswith('elastic'):
-            search_results = urlopen(self.es_get_url).read()
+            search_results = urlopen(self.es_get_url).read().decode('utf-8')
             es_mappings = json.loads(search_results)
             # Results look like: {"<index_name>":{"mappings":{"<doc_type>":{"<field_name>":{"full_name":"<field_name>","mapping":{"<sub-field_name>":{"type":"date","index_name":"<sub-field_name>","boost":1.0,"index":"not_analyzed","store":false,"doc_values":false,"term_vector":"no","norms":{"enabled":false},"index_options":"docs","index_analyzer":"_date/16","search_analyzer":"_date/max","postings_format":"default","doc_values_format":"default","similarity":"default","fielddata":{},"ignore_malformed":false,"coerce":true,"precision_step":16,"format":"dateOptionalTime","null_value":null,"include_in_all":false,"numeric_resolution":"milliseconds","locale":""}}},
             # now convert the mappings into the .kibana format
             field_cache = []
-            for (index_name, val) in es_mappings.iteritems():
+            for (index_name, val) in iteritems(es_mappings):
                 if index_name != self.index:  # only get non-'.kibana' indices
                     # print("index: %s" % index_name)
                     m_dict = es_mappings[index_name]['mappings']
@@ -156,7 +174,7 @@ class KibanaMapping():
     def get_index_mappings(self, index):
         """Converts all index's doc_types to .kibana"""
         fields_arr = []
-        for (key, val) in index.iteritems():
+        for (key, val) in iteritems(index):
             # print("\tdoc_type: %s" % key)
             doc_mapping = self.get_doc_type_mappings(index[key])
             # print("\tdoc_mapping: %s" % doc_mapping)
@@ -170,7 +188,7 @@ class KibanaMapping():
         """Converts all doc_types' fields to .kibana"""
         doc_fields_arr = []
         found_score = False
-        for (key, val) in doc_type.iteritems():
+        for (key, val) in iteritems(doc_type):
             # print("\t\tfield: %s" % key)
             # print("\tval: %s" % val)
             add_it = False
@@ -222,7 +240,7 @@ class KibanaMapping():
         retdict = {}
         retdict['indexed'] = False
         retdict['analyzed'] = False
-        for (key, val) in field.iteritems():
+        for (key, val) in iteritems(field):
             if key in self.mappings:
                 if (key == 'type' and
                     (val == "long" or

@@ -65,10 +65,11 @@ class DotKibana():
             print("Writing %d dashboards, %d visualizations, %d searches, "
                   "as well as the config, to disk" %
                   (len(boards), len(vizs), len(searches)))
-            objects = dict(searches.items() +
-                          vizs.items() +
-                          boards.items() +
-                          config.items())
+            objects = {}
+            objects.update(searches)
+            objects.update(vizs)
+            objects.update(boards)
+            objects.update(config)
         elif mode == 'config':
             print("Exporting config object")
             objects = self.manager.get_config()

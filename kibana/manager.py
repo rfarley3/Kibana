@@ -5,6 +5,19 @@ from elasticsearch import Elasticsearch, RequestError
 from datetime import datetime
 import json
 import os
+import sys
+
+
+PY3 = False
+if sys.version_info[0] >= 3:
+    PY3 = True
+
+
+def iteritems(d):
+    if PY3:
+        return d.items()
+    else:
+        return d.iteritems()
 
 
 """
@@ -68,13 +81,13 @@ class KibanaManager():
         print("Reading object from file: " + filename)
         obj = {}
         with open(filename, 'r') as f:
-            obj = json.loads(f.read())
+            obj = json.loads(f.read().decode('utf-8'))
         return obj
 
     def read_pkg_from_file(self, filename):
         obj = {}
         with open(filename, 'r') as f:
-            obj = json.loads(f.read())
+            obj = json.loads(f.read().decode('utf-8'))
         return obj
 
     def put_object(self, obj):
@@ -113,7 +126,7 @@ class KibanaManager():
             self.put_object(obj)
 
     def put_objects(self, objects):
-        for name, obj in objects.iteritems():
+        for name, obj in iteritems(objects):
             self.put_object(obj)
 
     def del_object(self, obj):
@@ -130,7 +143,7 @@ class KibanaManager():
                        doc_type=obj['_type'])
 
     def del_objects(self, objects):
-        for name, obj in objects.iteritems():
+        for name, obj in iteritems(objects):
             self.del_object(obj)
 
     def json_dumps(self, obj):
@@ -168,14 +181,14 @@ class KibanaManager():
         return filename
 
     def write_objects_to_file(self, objects, path='.'):
-        for name, obj in objects.iteritems():
+        for name, obj in iteritems(objects):
             self.write_object_to_file(obj, path)
 
     def write_pkg_to_file(self, name, objects, path='.'):
         """Write a list of related objs to file"""
         objs = {}
         objs['docs'] = []
-        for _, obj in objects.iteritems():
+        for _, obj in iteritems(objects):
             objs['docs'].append(obj)
         output = self.json_dumps(objs['docs']) + '\n'
         filename = self.safe_filename('Pkg', name)
@@ -230,18 +243,18 @@ class KibanaManager():
         dashboards = self.get_objects("type", "dashboard")
         vizs = self.get_objects("type", "visualization")
         searches = self.get_objects("type", "search")
-        for name, val in dashboards.iteritems():
+        for name, val in iteritems(dashboards):
             if name == dboard:
                 print("Found dashboard: " + name)
                 objects[name] = val
                 panels = json.loads(dashboards[name]['_source']['panelsJSON'])
                 for panel in panels:
                     try:
-                        for vname, vval in vizs.iteritems():
+                        for vname, vval in iteritems(vizs):
                             if vname == panel['id']:
                                 print("Found vis:       " + panel['id'])
                                 objects[vname] = vval
-                        for sname, sval in searches.iteritems():
+                        for sname, sval in iteritems(searches):
                             if sname == panel['id']:
                                 print("Found search:    " + panel['id'])
                                 objects[sname] = sval
