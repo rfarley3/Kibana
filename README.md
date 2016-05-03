@@ -89,8 +89,7 @@ python -c "import kibana; kibana.DotKibana('INDEX_PATT').mapping.test_cache();"
 
 ## Release Checklist
 
-* mktmpenv
-    * For both python 2 and 3
+* mktmpenv, for both python 2 and 3:
     * `pip install -e .`
     * Do tests
     * `deactivate`

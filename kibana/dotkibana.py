@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import absolute_import, division, unicode_literals, print_function
+from __future__ import absolute_import, unicode_literals, print_function
 
 from .mapping import KibanaMapping
 from .manager import KibanaManager
@@ -10,7 +10,10 @@ class DotKibana():
         self._host = host
         self.index = '.kibana'
         self._index_pattern = index_pattern
-        self.mapping = KibanaMapping(self.index, self._index_pattern, self._host)
+        self.mapping = KibanaMapping(
+            self.index,
+            self._index_pattern,
+            self._host)
         self.manager = KibanaManager(self.index, self._host)
 
     @property

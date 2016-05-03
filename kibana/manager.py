@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import absolute_import, division, unicode_literals, print_function
+from __future__ import absolute_import, unicode_literals, print_function
 
 from elasticsearch import Elasticsearch, RequestError
 from datetime import datetime
@@ -8,6 +8,7 @@ import os
 import sys
 
 
+DEBUG = True
 PY3 = False
 if sys.version_info[0] >= 3:
     PY3 = True
@@ -25,7 +26,7 @@ Access all the internal kibana objects, like dashboards,
 visualizations, saved searches, and config as json.
 
 import-pkg:
-    -for each element in { 'docs': [] } do import
+    -for each element in [] do import
 
 import:
     - loads json files into the internal kibana index
@@ -34,13 +35,14 @@ import:
           with the actual document in _source
 
 export-pkg:
-    -{ 'docs': [<all found objects>] }
+    -[<all found objects>]
 
 export:
     - search the internal kibana index for a specific type of document
          * 'all' or no additional CLA means all object types
          * 'config' means only the config document
-         * <any ID of a dashboard> means only that dashboard and its visualizations/saved searches
+         * <any ID of a dashboard> means only that dashboard and
+           its visualizations/saved searches
     - write each found document to a separate json file
     - the document will appear in _source; with additional metadata needed
           to import it later in _index, _id, and _type.
@@ -62,6 +64,16 @@ class KibanaManager():
         self.es = None
         self.max_hits = 9999
 
+    def pr_dbg(self, msg):
+        if DEBUG:
+            print('[DBG] Manager %s' % msg)
+
+    def pr_inf(self, msg):
+        print('[INF] Manager %s' % msg)
+
+    def pr_err(self, msg):
+        print('[ERR] Manager %s' % msg)
+
     @property
     def host(self):
         return (self._host_ip, self._host_port)
@@ -74,11 +86,11 @@ class KibanaManager():
     def connect_es(self):
         if self.es is not None:
             return
-        # use port=PORT for remote host
-        self.es = Elasticsearch([{'host': self._host_ip, 'port': self._host_port}])
+        self.es = Elasticsearch(
+            [{'host': self._host_ip, 'port': self._host_port}])
 
     def read_object_from_file(self, filename):
-        print("Reading object from file: " + filename)
+        self.pr_inf("Reading object from file: " + filename)
         obj = {}
         with open(filename, 'r') as f:
             obj = json.loads(f.read().decode('utf-8'))
@@ -92,7 +104,7 @@ class KibanaManager():
 
     def put_object(self, obj):
         # TODO consider putting into a ES class
-        print('put_obj: %s' % self.json_dumps(obj))
+        self.pr_dbg('put_obj: %s' % self.json_dumps(obj))
         """
         Wrapper for es.index, determines metadata needed to index from obj.
         If you have a raw object json string you can hard code these:
@@ -117,7 +129,7 @@ class KibanaManager():
                                  doc_type=obj['_type'],
                                  body=obj['_source'], timeout="2m")
         except RequestError as e:
-            print('RequestError: %s, info: %s' % (e.error, e.info))
+            self.pr_err('RequestError: %s, info: %s' % (e.error, e.info))
             raise
         return resp
 
@@ -174,10 +186,10 @@ class KibanaManager():
         output = self.json_dumps(obj) + '\n'
         filename = self.safe_filename(obj['_type'], obj['_id'])
         filename = os.path.join(path, filename)
-        print("Writing to file: " + filename)
+        self.pr_inf("Writing to file: " + filename)
         with open(filename, 'w') as f:
             f.write(output)
-        # print("Contents: " + output)
+        # self.pr_dbg("Contents: " + output)
         return filename
 
     def write_objects_to_file(self, objects, path='.'):
@@ -186,17 +198,18 @@ class KibanaManager():
 
     def write_pkg_to_file(self, name, objects, path='.'):
         """Write a list of related objs to file"""
-        objs = {}
-        objs['docs'] = []
+        # Kibana uses an array of docs, do the same
+        # as opposed to a dict of docs
+        pkg_objs = []
         for _, obj in iteritems(objects):
-            objs['docs'].append(obj)
-        output = self.json_dumps(objs['docs']) + '\n'
+            pkg_objs.append(obj)
+        output = self.json_dumps(pkg_objs) + '\n'
         filename = self.safe_filename('Pkg', name)
         filename = os.path.join(path, filename)
-        print("Writing to file: " + filename)
+        self.pr_inf("Writing to file: " + filename)
         with open(filename, 'w') as f:
             f.write(output)
-        # print("Contents: " + output)
+        # self.pr_dbg("Contents: " + output)
         return filename
 
     def get_objects(self, search_field, search_val):
@@ -207,7 +220,7 @@ class KibanaManager():
                  " } } } } } }")
         self.connect_es()
         res = self.es.search(index=self.index, body=query)
-        # print("%d Hits:" % res['hits']['total'])
+        # self.pr_dbg("%d Hits:" % res['hits']['total'])
         objects = {}
         for doc in res['hits']['hits']:
             objects[doc['_id']] = {}
@@ -245,21 +258,21 @@ class KibanaManager():
         searches = self.get_objects("type", "search")
         for name, val in iteritems(dashboards):
             if name == dboard:
-                print("Found dashboard: " + name)
+                self.pr_inf("Found dashboard: " + name)
                 objects[name] = val
                 panels = json.loads(dashboards[name]['_source']['panelsJSON'])
                 for panel in panels:
                     try:
                         for vname, vval in iteritems(vizs):
                             if vname == panel['id']:
-                                print("Found vis:       " + panel['id'])
+                                self.pr_inf("Found vis:       " + panel['id'])
                                 objects[vname] = vval
                         for sname, sval in iteritems(searches):
                             if sname == panel['id']:
-                                print("Found search:    " + panel['id'])
+                                self.pr_inf("Found search:    " + panel['id'])
                                 objects[sname] = sval
                     except KeyError:
-                        print("KeyError: %s" % panel)
+                        self.pr_err("KeyError: %s" % panel)
                         return {}
                 return objects
 
