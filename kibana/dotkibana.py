@@ -6,9 +6,9 @@ from .manager import KibanaManager
 
 
 class DotKibana():
-    def __init__(self, index_pattern='*', host=('localhost', 9200)):
+    def __init__(self, index_pattern='*', host=('localhost', 9200), index='.kibana'):
         self._host = host
-        self.index = '.kibana'
+        self.index = index
         self._index_pattern = index_pattern
         self.mapping = KibanaMapping(
             self.index,

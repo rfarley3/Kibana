@@ -84,6 +84,12 @@ def getargs():
         dest='host',
         default='localhost:9200',
         help='ES host to use, format ip:port')
+    parser.add_argument(
+        '--index',
+        action='store',
+        dest='index',
+        default='.kibana',
+        help='Kibana index to work on')
     infile = None
     exp_obj = None
     map_cmd = None
@@ -115,6 +121,7 @@ def getargs():
     host_arr = results.host.split(':')
     host = (host_arr[0], int(host_arr[1]))
     outdir = results.output_path
+    index = results.index
     args = {}
     args['host'] = host
     args['idx_pattern'] = idx_pattern
@@ -124,12 +131,13 @@ def getargs():
     args['infile'] = infile
     args['exp_obj'] = exp_obj
     args['outdir'] = outdir
+    args['index'] = index
     return args
 
 
 def main():
     args = getargs()
-    dotk = DotKibana(index_pattern=args['idx_pattern'], host=args['host'])
+    dotk = DotKibana(index_pattern=args['idx_pattern'], host=args['host'], index=args['index'])
     if args['mode'] == 'mapping':
         return handle_mapping(dotk, args['map_cmd'])
     elif args['mode'] == 'export':
