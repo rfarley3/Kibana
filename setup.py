@@ -3,7 +3,7 @@ from setuptools import setup
 setup(
     name='kibana',
     packages=['kibana'],
-    version='0.4',
+    version='0.5',
     description='Kibana configuration index (.kibana) command line interface and python API (visualization import/export and mappings refresh)',
     author='Ryan Farley',
     author_email='rfarley@mitre.org',
