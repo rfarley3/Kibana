@@ -263,7 +263,8 @@ class KibanaMapping():
                 if (key == 'type' and
                     (val == "long" or
                      val == "integer" or
-                     val == "double")):
+                     val == "double" or
+                     val == "float")):
                     val = "number"
                 # self.pr_dbg("\t\t\tkey: %s" % key)
                 # self.pr_dbg("\t\t\t\tval: %s" % val)
