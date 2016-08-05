@@ -203,7 +203,8 @@ class KibanaManager():
         pkg_objs = []
         for _, obj in iteritems(objects):
             pkg_objs.append(obj)
-        output = self.json_dumps(sorted(pkg_objs, key=lambda k: k['_id'])) + '\n'
+        sorted_pkg = sorted(pkg_objs, key=lambda k: k['_id'])
+        output = self.json_dumps(sorted_pkg) + '\n'
         filename = self.safe_filename('Pkg', name)
         filename = os.path.join(path, filename)
         self.pr_inf("Writing to file: " + filename)
