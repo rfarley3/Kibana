@@ -92,13 +92,13 @@ class KibanaManager():
     def read_object_from_file(self, filename):
         self.pr_inf("Reading object from file: " + filename)
         obj = {}
-        with open(filename, 'r') as f:
+        with open(filename, 'rb') as f:
             obj = json.loads(f.read().decode('utf-8'))
         return obj
 
     def read_pkg_from_file(self, filename):
         obj = {}
-        with open(filename, 'r') as f:
+        with open(filename, 'rb') as f:
             obj = json.loads(f.read().decode('utf-8'))
         return obj
 
