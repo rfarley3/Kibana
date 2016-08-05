@@ -8,7 +8,6 @@ import os
 import sys
 
 
-DEBUG = True
 PY3 = False
 if sys.version_info[0] >= 3:
     PY3 = True
@@ -57,15 +56,16 @@ Alternative is to skip the ES API and use urllib/curl on
 
 class KibanaManager():
     """Import/Export Kibana objects"""
-    def __init__(self, index, host):
+    def __init__(self, index, host, debug=False):
         self._host_ip = host[0]
         self._host_port = host[1]
         self.index = index
         self.es = None
         self.max_hits = 9999
+        self.debug = debug
 
     def pr_dbg(self, msg):
-        if DEBUG:
+        if self.debug:
             print('[DBG] Manager %s' % msg)
 
     def pr_inf(self, msg):
@@ -92,13 +92,13 @@ class KibanaManager():
     def read_object_from_file(self, filename):
         self.pr_inf("Reading object from file: " + filename)
         obj = {}
-        with open(filename, 'r') as f:
+        with open(filename, 'rb') as f:
             obj = json.loads(f.read().decode('utf-8'))
         return obj
 
     def read_pkg_from_file(self, filename):
         obj = {}
-        with open(filename, 'r') as f:
+        with open(filename, 'rb') as f:
             obj = json.loads(f.read().decode('utf-8'))
         return obj
 
@@ -203,13 +203,12 @@ class KibanaManager():
         pkg_objs = []
         for _, obj in iteritems(objects):
             pkg_objs.append(obj)
-        output = self.json_dumps(pkg_objs) + '\n'
+        output = self.json_dumps(sorted(pkg_objs, key=lambda k: k['_id'])) + '\n'
         filename = self.safe_filename('Pkg', name)
         filename = os.path.join(path, filename)
         self.pr_inf("Writing to file: " + filename)
         with open(filename, 'w') as f:
             f.write(output)
-        # self.pr_dbg("Contents: " + output)
         return filename
 
     def get_objects(self, search_field, search_val):
