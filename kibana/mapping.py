@@ -14,7 +14,6 @@ import time
 import sys
 
 
-DEBUG = True
 PY3 = False
 if sys.version_info[0] >= 3:
     PY3 = True
@@ -28,7 +27,7 @@ def iteritems(d):
 
 
 class KibanaMapping():
-    def __init__(self, index, index_pattern, host):
+    def __init__(self, index, index_pattern, host, debug=False):
         self.index = index
         self._index_pattern = index_pattern
         self._host = host
@@ -43,9 +42,10 @@ class KibanaMapping():
         self.sys_mappings = ['_source', '_index', '_type', '_id']
         # .kibana has some fields to ignore too:
         self.mappings_ignore = ['count']
+        self.debug = debug
 
     def pr_dbg(self, msg):
-        if DEBUG:
+        if self.debug:
             print('[DBG] Mapping %s' % msg)
 
     def pr_inf(self, msg):

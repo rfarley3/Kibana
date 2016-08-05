@@ -8,7 +8,6 @@ import os
 import sys
 
 
-DEBUG = True
 PY3 = False
 if sys.version_info[0] >= 3:
     PY3 = True
@@ -57,15 +56,16 @@ Alternative is to skip the ES API and use urllib/curl on
 
 class KibanaManager():
     """Import/Export Kibana objects"""
-    def __init__(self, index, host):
+    def __init__(self, index, host, debug=False):
         self._host_ip = host[0]
         self._host_port = host[1]
         self.index = index
         self.es = None
         self.max_hits = 9999
+        self.debug = debug
 
     def pr_dbg(self, msg):
-        if DEBUG:
+        if self.debug:
             print('[DBG] Manager %s' % msg)
 
     def pr_inf(self, msg):

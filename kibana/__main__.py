@@ -41,6 +41,12 @@ def getargs():
     # '--export %s --outdir %s'       % [all|config|dashboard], outpath
     parser = argparse.ArgumentParser(description='.kibana interaction module')
     parser.add_argument(
+        '--verbose', '-v',
+        action='store_true',
+        dest='pr_dbg',
+        default=False,
+        help='show debug output')
+    parser.add_argument(
         '--status', '-s',
         action='store',
         dest='status_idx',
@@ -83,7 +89,7 @@ def getargs():
         action='store',
         dest='host',
         default='localhost:9200',
-        help='ES host to use, format ip:port')
+        help='ES (not kibana) host and port to use, format ip:port')
     parser.add_argument(
         '--index',
         action='store',
@@ -117,27 +123,25 @@ def getargs():
     if mode is None:
         # usage
         pass
-    is_pkg = results.pkg_flag
     host_arr = results.host.split(':')
     host = (host_arr[0], int(host_arr[1]))
-    outdir = results.output_path
-    index = results.index
     args = {}
     args['host'] = host
     args['idx_pattern'] = idx_pattern
     args['mode'] = mode
-    args['is_pkg'] = is_pkg
+    args['is_pkg'] = results.pkg_flag
     args['map_cmd'] = map_cmd
     args['infile'] = infile
     args['exp_obj'] = exp_obj
-    args['outdir'] = outdir
-    args['index'] = index
+    args['outdir'] = results.output_path
+    args['index'] = results.index
+    args['pr_dbg'] = results.pr_dbg
     return args
 
 
 def main():
     args = getargs()
-    dotk = DotKibana(index_pattern=args['idx_pattern'], host=args['host'], index=args['index'])
+    dotk = DotKibana(index_pattern=args['idx_pattern'], host=args['host'], index=args['index'], debug=args['pr_dbg'])
     if args['mode'] == 'mapping':
         return handle_mapping(dotk, args['map_cmd'])
     elif args['mode'] == 'export':
