@@ -58,7 +58,7 @@ class DotKibana():
         # TODO test return value for success
         return 0
 
-    def do_export(self, mode, path='.', pkg=False):
+    def do_export(self, mode, path='.', pkg=False, filename=None):
         print("Exporting from %s to %s" % (self.index, path))
         if mode == 'all':
             print("Exporting all objects")
@@ -88,10 +88,10 @@ class DotKibana():
             print("%d dashboard objects found" % len(objects))
         if pkg:
             print("Writing package to disk")
-            self.manager.write_pkg_to_file(mode, objects, path)
+            self.manager.write_pkg_to_file(mode, objects, path, filename)
         else:
             print("Writing %d objects to disk" % len(objects))
-            self.manager.write_objects_to_file(objects, path)
+            self.manager.write_objects_to_file(objects, path, filename)
         print("Export complete")
         return 0
 

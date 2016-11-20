@@ -181,10 +181,11 @@ class KibanaManager():
                 ts += '-bck'
         return fname
 
-    def write_object_to_file(self, obj, path='.'):
+    def write_object_to_file(self, obj, path='.', filename=None):
         """Convert obj (dict) to json string and write to file"""
         output = self.json_dumps(obj) + '\n'
-        filename = self.safe_filename(obj['_type'], obj['_id'])
+        if filename is None:
+            filename = self.safe_filename(obj['_type'], obj['_id'])
         filename = os.path.join(path, filename)
         self.pr_inf("Writing to file: " + filename)
         with open(filename, 'w') as f:
@@ -196,7 +197,7 @@ class KibanaManager():
         for name, obj in iteritems(objects):
             self.write_object_to_file(obj, path)
 
-    def write_pkg_to_file(self, name, objects, path='.'):
+    def write_pkg_to_file(self, name, objects, path='.', filename=None):
         """Write a list of related objs to file"""
         # Kibana uses an array of docs, do the same
         # as opposed to a dict of docs
@@ -205,7 +206,8 @@ class KibanaManager():
             pkg_objs.append(obj)
         sorted_pkg = sorted(pkg_objs, key=lambda k: k['_id'])
         output = self.json_dumps(sorted_pkg) + '\n'
-        filename = self.safe_filename('Pkg', name)
+        if filename is None:
+            filename = self.safe_filename('Pkg', name)
         filename = os.path.join(path, filename)
         self.pr_inf("Writing to file: " + filename)
         with open(filename, 'w') as f:
