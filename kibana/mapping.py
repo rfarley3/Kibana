@@ -155,7 +155,7 @@ class KibanaMapping():
     def field_cache_to_index_pattern(self, field_cache):
         """Return a .kibana index-pattern doc_type"""
         mapping_dict = {}
-        # consider ignoring customFormats to lean on partial updates to maintain existing value
+        # consider ignoring customFormats to maintain existing value
         mapping_dict['customFormats'] = "{}"
         mapping_dict['title'] = self.index_pattern
         # now post the data into .kibana
