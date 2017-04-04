@@ -74,6 +74,10 @@ class KibanaMapping():
         self.get_url = ('http://%s:%s/' % (self._host[0], self._host[1]) +
                         '%s/' % self.index +
                         'index-pattern/%s/' % self._index_pattern)
+        # 'http://localhost:9200/.kibana/index-pattern/aaa*/_update'
+        self.update_url = ('http://%s:%s/' % (self._host[0], self._host[1]) +
+                           '%s/' % self.index +
+                           'index-pattern/%s/_update' % self._index_pattern)
 
     @property
     def index_pattern(self):
@@ -142,9 +146,8 @@ class KibanaMapping():
     def post_field_cache(self, field_cache):
         """Where field_cache is a list of fields' mappings"""
         index_pattern = self.field_cache_to_index_pattern(field_cache)
-        # self.pr_dbg("request/post: %s" % index_pattern)
-        resp = requests.post(self.post_url, data=index_pattern).text
-        # resp = {"_index":".kibana","_type":"index-pattern","_id":"aaa*","_version":1,"created":true}  # noqa
+        resp = requests.put(self.update_url, data=index_pattern).text
+        # resp = {"_index":".kibana","_type":"index-pattern","_id":"aaa*","_version":???, ???}  # noqa
         resp = json.loads(resp)
         return 0
         # TODO detect failure (return 1)
@@ -152,6 +155,7 @@ class KibanaMapping():
     def field_cache_to_index_pattern(self, field_cache):
         """Return a .kibana index-pattern doc_type"""
         mapping_dict = {}
+        # consider ignoring customFormats to lean on partial updates to maintain existing value
         mapping_dict['customFormats'] = "{}"
         mapping_dict['title'] = self.index_pattern
         # now post the data into .kibana
